@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Bar Chart - D3.js</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style media="screen">
+    * {
+        margin: 0;
+        padding: 0;
+        }
+      body{
+        text-align:center;
+        }
+      .title {
+        font-family:arial;
+        margin:10px;
+        }
+      svg{
+        background-color:AntiqueWhite ;
+
+        }
+      .bar:hover {
+          fill: aqua;
+        }
+
+        .tooltip{
+        color:blue;
+        background-color:AntiqueWhite;
+        border:1px solid black
+        }
+    </style>
+  </head>
+  <body>
+    <h1 class="title">D3.JS - Bar Chart</h1>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function() {
+        req = new XMLHttpRequest();
+        req.open(
+          "GET",
+          "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json",
+          true
+        );
+        req.send();
+        req.onload = function() {
+          json = JSON.parse(req.responseText);
+
+          //document.getElementsByClassName('content')[0].innerHTML=JSON.stringify(json);
+
+          //var data = JSON.stringify(json);
+          //console.log(json.data);
+          var data = json.data;
+          //document.getElementsByClassName('content')[0].innerHTML=json.data;
+          //console.log(data);
+
+          const w = 1000;
+          const h = 500;
+          const padding = 50;
+
+          var minValue = d3.min(data, d => d[1]);
+          var maxValue = d3.max(data, d => d[1]);
+
+        var years=[];
+
+            function extractYears(){
+          for(var i=0; i<data.length; i++) {
+            years[i]=data[i][0].substring(0,4)
+
+          }};
+          extractYears();
+
+          //console.log(years)
+           var totalData=[];
+          totalData.push(data[0]);
+          totalData.push(years);
+
+          console.log(totalData);
+
+          const yScale = d3
+            .scaleLinear()
+            .domain([0, maxValue])
+            .range([h, padding + 0]);
+
+          const xScale = d3
+            .scaleLinear()
+            .domain([0, data.length])
+            .range([padding, w - padding]);
+
+        /* var tooltip = d3 // this is the best way to the find a tooltip, since you can add a class and, therefore, style it
+            .select("body")
+            .append("div")
+            .style("position", "absolute")
+            .attr("class","tooltip")
+            .style("visibility", "hidden")
+            .html(function(){return data});*/
+
+          const svg = d3
+            .select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h)
+            .append("g")//this is very importat to place correctly the x-axis
+            .attr("transform", "translate(" + 0 + "," + -padding/2 + ")");// I am lifting the svg container half of the padding in order to adjust the contect wih the x-axis
+
+          svg
+            .selectAll("rect")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", (d, i) => yScale(d[1]))
+            .attr("width", 2.5)
+            .attr("height", (d, i) => h - yScale(d[1]))
+            .attr("fill", "blue")
+            .attr("class", "bar")
+            .append("title")
+            .html(function(d) {return "date: " +d[0] + "<br>" + d[1]  })
+            .attr("class","tooltip")
+
+          //this is related to the tooltip
+
+         /*   .on("mouseover", function() {
+              return tooltip.style("visibility", "visible");
+            }) //Here I make the tooltip to appear when I hover above every entry
+            .on("mousemove", function() {
+              return tooltip
+                .style("top", event.pageY - 10 + "px")
+                .style("left", event.pageX + 10 + "px");
+            }) // Here I define the coordenates where the tooltip will appear
+            .on("mouseout", function() {
+              return tooltip.style("visibility", "hidden");
+            }); // I make it disappear when I am not hovering.*/
+
+          const xAxis = d3.axisBottom(xScale);
+
+          const yAxis = d3.axisLeft(yScale);
+
+          svg
+            .append("g")
+            .attr("transform", "translate(0," + h + ")")
+            .call(xAxis);
+
+          svg
+            .append("g")
+            .attr("transform", "translate(" + padding + ",0)")
+            .call(yAxis);
+        };
+        });
+
+    </script>
+  </body>
+</html>
